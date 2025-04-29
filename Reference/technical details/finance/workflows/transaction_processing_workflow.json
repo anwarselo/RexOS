@@ -1,0 +1,411 @@
+{
+  "name": "Financial Transaction Processing",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-webhook",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ],
+      "webhookId": "whatsapp-financial-webhook"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Extract the message data from YCloud webhook\nconst data = $input.item.json.body;\n\n// Check if this is a WhatsApp message\nif (data && data.event === 'message' && data.channel === 'whatsapp') {\n  const message = data.content?.text || '';\n  const sender = data.from || '';\n  const messageId = data.id || '';\n  const timestamp = data.createdAt || new Date().toISOString();\n  \n  return {\n    json: {\n      messageId,\n      sender,\n      message,\n      timestamp,\n      isProcessed: false,\n      processingMethod: null,\n      transactionData: null\n    }\n  };\n} else {\n  // Not a WhatsApp message we want to process\n  return {\n    json: {\n      skip: true,\n      reason: 'Not a valid WhatsApp message'\n    }\n  };\n}"
+      },
+      "name": "Extract Message Data",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.skip }}",
+              "operation": "exists"
+            }
+          ]
+        }
+      },
+      "name": "Is Valid Message?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Pattern matching for transaction extraction\nconst message = $input.item.json.message;\n\n// Define regex patterns for different transaction types\nconst patterns = {\n  // Expense pattern: amount, category, vendor\n  expense: /(?:spent|paid|expense|cost|bought|purchased|payment)\\s+(?:of\\s+)?\\$?(\\d+(?:\\.\\d{1,2})?)\\s+(?:on|for|at|to)?\\s+(?:([\\w\\s]+))?(?:\\s+at\\s+|\\s+to\\s+|\\s+from\\s+)?([\\w\\s]+)?/i,\n  \n  // Income pattern: amount, source\n  income: /(?:received|earned|got|income|payment of)\\s+(?:of\\s+)?\\$?(\\d+(?:\\.\\d{1,2})?)\\s+(?:from|by|via|through)?\\s+([\\w\\s]+)?/i,\n  \n  // Transfer pattern: amount, from account, to account\n  transfer: /(?:transferred|moved|sent)\\s+(?:of\\s+)?\\$?(\\d+(?:\\.\\d{1,2})?)\\s+(?:from\\s+([\\w\\s]+))?\\s+(?:to\\s+([\\w\\s]+))?/i\n};\n\n// Try to match the message against patterns\nlet transactionData = null;\nlet transactionType = null;\nlet matchFound = false;\n\n// Check for expense pattern\nconst expenseMatch = message.match(patterns.expense);\nif (expenseMatch) {\n  const [_, amount, category, vendor] = expenseMatch;\n  transactionData = {\n    type: 'expense',\n    amount: parseFloat(amount),\n    category: category ? category.trim() : 'Uncategorized',\n    vendor: vendor ? vendor.trim() : 'Unknown',\n    date: new Date().toISOString().split('T')[0]\n  };\n  transactionType = 'expense';\n  matchFound = true;\n}\n\n// Check for income pattern if no expense match\nif (!matchFound) {\n  const incomeMatch = message.match(patterns.income);\n  if (incomeMatch) {\n    const [_, amount, source] = incomeMatch;\n    transactionData = {\n      type: 'income',\n      amount: parseFloat(amount),\n      source: source ? source.trim() : 'Unknown',\n      category: 'Income',\n      date: new Date().toISOString().split('T')[0]\n    };\n    transactionType = 'income';\n    matchFound = true;\n  }\n}\n\n// Check for transfer pattern if no other matches\nif (!matchFound) {\n  const transferMatch = message.match(patterns.transfer);\n  if (transferMatch) {\n    const [_, amount, fromAccount, toAccount] = transferMatch;\n    transactionData = {\n      type: 'transfer',\n      amount: parseFloat(amount),\n      fromAccount: fromAccount ? fromAccount.trim() : 'Unknown',\n      toAccount: toAccount ? toAccount.trim() : 'Unknown',\n      date: new Date().toISOString().split('T')[0]\n    };\n    transactionType = 'transfer';\n    matchFound = true;\n  }\n}\n\n// Return the result\nreturn {\n  json: {\n    ...$input.item.json,\n    patternMatchAttempted: true,\n    patternMatchSuccessful: matchFound,\n    transactionType: transactionType,\n    transactionData: transactionData,\n    processingMethod: matchFound ? 'pattern_matching' : null,\n    needsAiProcessing: !matchFound\n  }\n};"
+      },
+      "name": "Pattern Matching",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        850,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.patternMatchSuccessful }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Pattern Match Successful?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Template matching for transaction extraction\nconst message = $input.item.json.message.toLowerCase();\n\n// Define templates for common transaction formats\nconst templates = [\n  // Template: \"Grocery $45.30 Walmart\"\n  {\n    regex: /(\\w+)\\s+\\$?(\\d+(?:\\.\\d{1,2})?)\\s+([\\w\\s]+)/i,\n    process: (matches) => {\n      const [_, category, amount, vendor] = matches;\n      return {\n        type: 'expense',\n        amount: parseFloat(amount),\n        category: category.trim(),\n        vendor: vendor.trim(),\n        date: new Date().toISOString().split('T')[0]\n      };\n    }\n  },\n  // Template: \"$50 gas station\"\n  {\n    regex: /\\$?(\\d+(?:\\.\\d{1,2})?)\\s+([\\w\\s]+)/i,\n    process: (matches) => {\n      const [_, amount, description] = matches;\n      // Try to determine if this is a vendor or category\n      const commonVendors = ['walmart', 'target', 'amazon', 'starbucks', 'mcdonalds', 'uber', 'lyft'];\n      const commonCategories = ['groceries', 'food', 'gas', 'transportation', 'entertainment', 'utilities'];\n      \n      let category = 'Uncategorized';\n      let vendor = 'Unknown';\n      \n      const words = description.toLowerCase().split(' ');\n      \n      // Check if any word matches common vendors\n      for (const word of words) {\n        if (commonVendors.includes(word)) {\n          vendor = description.trim();\n          break;\n        }\n      }\n      \n      // Check if any word matches common categories\n      for (const word of words) {\n        if (commonCategories.includes(word)) {\n          category = word.charAt(0).toUpperCase() + word.slice(1);\n          if (vendor === 'Unknown') {\n            vendor = description.trim();\n          }\n          break;\n        }\n      }\n      \n      // If no category was found but vendor was, use a default category\n      if (category === 'Uncategorized' && vendor !== 'Unknown') {\n        category = 'General';\n      }\n      \n      // If no vendor was found but category was, use description as vendor\n      if (vendor === 'Unknown' && category !== 'Uncategorized') {\n        vendor = description.trim();\n      }\n      \n      return {\n        type: 'expense',\n        amount: parseFloat(amount),\n        category: category,\n        vendor: vendor,\n        date: new Date().toISOString().split('T')[0]\n      };\n    }\n  }\n];\n\n// Try to match the message against templates\nlet transactionData = null;\nlet matchFound = false;\n\nfor (const template of templates) {\n  const match = message.match(template.regex);\n  if (match) {\n    transactionData = template.process(match);\n    matchFound = true;\n    break;\n  }\n}\n\n// Return the result\nreturn {\n  json: {\n    ...$input.item.json,\n    templateMatchAttempted: true,\n    templateMatchSuccessful: matchFound,\n    transactionData: matchFound ? transactionData : $input.item.json.transactionData,\n    processingMethod: matchFound ? 'template_matching' : $input.item.json.processingMethod,\n    needsAiProcessing: !matchFound && $input.item.json.needsAiProcessing\n  }\n};"
+      },
+      "name": "Template Matching",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.templateMatchSuccessful }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Template Match Successful?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "headerAuth",
+        "httpMethod": "POST",
+        "url": "=https://api.deepseek.com/v1/chat/completions",
+        "options": {},
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "model",
+              "value": "deepseek-chat"
+            },
+            {
+              "name": "messages",
+              "value": "=[\n  {\n    \"role\": \"system\",\n    \"content\": \"You are a financial transaction extraction assistant. Your task is to extract transaction details from user messages. Extract only factual information, do not make assumptions. If you cannot determine a value with certainty, use 'Unknown' or 'Uncategorized'. Format your response as JSON with the following structure for different transaction types:\\n\\nFor expenses:\\n{\\n  \\\"type\\\": \\\"expense\\\",\\n  \\\"amount\\\": [numeric value],\\n  \\\"category\\\": [category name],\\n  \\\"vendor\\\": [vendor name],\\n  \\\"date\\\": [YYYY-MM-DD]\\n}\\n\\nFor income:\\n{\\n  \\\"type\\\": \\\"income\\\",\\n  \\\"amount\\\": [numeric value],\\n  \\\"source\\\": [income source],\\n  \\\"category\\\": \\\"Income\\\",\\n  \\\"date\\\": [YYYY-MM-DD]\\n}\\n\\nFor transfers:\\n{\\n  \\\"type\\\": \\\"transfer\\\",\\n  \\\"amount\\\": [numeric value],\\n  \\\"fromAccount\\\": [source account],\\n  \\\"toAccount\\\": [destination account],\\n  \\\"date\\\": [YYYY-MM-DD]\\n}\\n\\nOnly respond with the JSON object, no additional text.\"\n  },\n  {\n    \"role\": \"user\",\n    \"content\": \"={{ $json.message }}\"\n  }\n]"
+            },
+            {
+              "name": "temperature",
+              "value": "0.1"
+            },
+            {
+              "name": "max_tokens",
+              "value": "500"
+            }
+          ]
+        },
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer YOUR_DEEPSEEK_API_KEY"
+            }
+          ]
+        }
+      },
+      "name": "AI Processing (DeepSeek)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        1650,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Extract the transaction data from the AI response\nlet transactionData = null;\n\ntry {\n  // Parse the AI response\n  const aiResponse = $input.item.json.body;\n  const content = aiResponse.choices[0].message.content;\n  \n  // Extract the JSON object from the content\n  transactionData = JSON.parse(content);\n  \n  // Add current date if not provided\n  if (!transactionData.date) {\n    transactionData.date = new Date().toISOString().split('T')[0];\n  }\n  \n  return {\n    json: {\n      ...$input.item.json,\n      aiProcessingAttempted: true,\n      aiProcessingSuccessful: true,\n      transactionData: transactionData,\n      processingMethod: 'ai_processing',\n      needsAiProcessing: false\n    }\n  };\n} catch (error) {\n  // Handle parsing errors\n  return {\n    json: {\n      ...$input.item.json,\n      aiProcessingAttempted: true,\n      aiProcessingSuccessful: false,\n      aiError: error.message,\n      processingMethod: $input.item.json.processingMethod,\n      needsAiProcessing: false\n    }\n  };\n}"
+      },
+      "name": "Process AI Response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1850,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "application": "YOUR_AIRTABLE_APP_ID",
+        "table": "Transactions",
+        "options": {}
+      },
+      "name": "Store in Airtable",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [
+        2050,
+        200
+      ],
+      "credentials": {
+        "airtableApi": {
+          "id": "YOUR_AIRTABLE_CREDENTIALS_ID",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "headerAuth",
+        "httpMethod": "POST",
+        "url": "=https://api.ycloud.com/v2/whatsapp/messages",
+        "options": {},
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "to",
+              "value": "={{ $json.sender }}"
+            },
+            {
+              "name": "type",
+              "value": "text"
+            },
+            {
+              "name": "text",
+              "value": "={% if $json.processingMethod === 'pattern_matching' || $json.processingMethod === 'template_matching' || $json.processingMethod === 'ai_processing' %}\n{% if $json.transactionData.type === 'expense' %}\n✅ Expense recorded:\\n💰 ${{ $json.transactionData.amount }}\\n📋 {{ $json.transactionData.category }}\\n🏢 {{ $json.transactionData.vendor }}\\n📅 {{ $json.transactionData.date }}\n{% elif $json.transactionData.type === 'income' %}\n✅ Income recorded:\\n💰 ${{ $json.transactionData.amount }}\\n💼 {{ $json.transactionData.source }}\\n📅 {{ $json.transactionData.date }}\n{% elif $json.transactionData.type === 'transfer' %}\n✅ Transfer recorded:\\n💰 ${{ $json.transactionData.amount }}\\n🔄 {{ $json.transactionData.fromAccount }} ➡️ {{ $json.transactionData.toAccount }}\\n📅 {{ $json.transactionData.date }}\n{% endif %}\n{% else %}\nI couldn't process that as a financial transaction. Please try again with a clearer format, such as:\\n- \"Spent $45 at Grocery Store\"\\n- \"Received $1200 salary from Company\"\\n- \"Transferred $500 from Savings to Checking\"\n{% endif %}"
+            }
+          ]
+        },
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-API-Key",
+              "value": "YOUR_YCLOUD_API_KEY"
+            }
+          ]
+        }
+      },
+      "name": "Send Confirmation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        2250,
+        200
+      ]
+    },
+    {
+      "parameters": {},
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [
+        2050,
+        300
+      ]
+    },
+    {
+      "parameters": {},
+      "name": "NoOp",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        850,
+        400
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Message Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Message Data": {
+      "main": [
+        [
+          {
+            "node": "Is Valid Message?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Valid Message?": {
+      "main": [
+        [
+          {
+            "node": "NoOp",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Pattern Matching",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pattern Matching": {
+      "main": [
+        [
+          {
+            "node": "Pattern Match Successful?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pattern Match Successful?": {
+      "main": [
+        [
+          {
+            "node": "Store in Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Template Matching",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Template Matching": {
+      "main": [
+        [
+          {
+            "node": "Template Match Successful?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Template Match Successful?": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Processing (DeepSeek)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Processing (DeepSeek)": {
+      "main": [
+        [
+          {
+            "node": "Process AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process AI Response": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Store in Airtable": {
+      "main": [
+        [
+          {
+            "node": "Send Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Store in Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {},
+  "staticData": null,
+  "tags": [
+    {
+      "name": "Financial Management"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-04-03T12:08:00.000Z",
+  "versionId": "1"
+}

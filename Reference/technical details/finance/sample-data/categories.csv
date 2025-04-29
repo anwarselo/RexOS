@@ -1,0 +1,11 @@
+category_id,category_name,category_type,is_default
+1,Salary,Income,TRUE
+2,Groceries,Expense,TRUE
+3,Rent/Mortgage,Expense,TRUE
+4,Utilities,Expense,TRUE
+5,Transportation,Expense,TRUE
+6,Entertainment,Expense,TRUE
+7,Transfer,Transfer,TRUE
+8,Dining Out,Expense,FALSE
+9,Healthcare,Expense,FALSE
+10,Education,Expense,FALSE

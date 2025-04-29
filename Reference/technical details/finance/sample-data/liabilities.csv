@@ -1,0 +1,6 @@
+liability_id,user_id,liability_type,liability_name,original_amount,current_balance,interest_rate,monthly_payment,start_date,end_date
+1,1,Mortgage,Home Mortgage,400000,375000,3.5,1800,2020-05-15,2050-05-15
+2,1,Auto Loan,Car Loan,35000,25000,4.2,650,2022-03-10,2027-03-10
+3,1,Student Loan,Education Loan,50000,30000,5.0,500,2015-09-01,2030-09-01
+4,1,Credit Card,Visa Credit Card,0,2500,18.99,100,2018-01-10,
+5,1,Personal Loan,Home Improvement,20000,15000,6.5,400,2023-06-15,2028-06-15

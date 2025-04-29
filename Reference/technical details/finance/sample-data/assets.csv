@@ -1,0 +1,5 @@
+asset_id,user_id,asset_type,asset_name,purchase_date,purchase_price,current_value
+1,1,Real Estate,Primary Residence,2020-05-15,450000,500000
+2,1,Vehicle,Toyota Camry,2022-03-10,35000,30000
+3,1,Collectibles,Rare Coin Collection,2019-11-20,5000,7500
+4,1,Other,Artwork,2021-07-05,2000,2500

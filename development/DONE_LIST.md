@@ -1,0 +1,35 @@
+# RexOS Development Done List
+
+This file tracks all completed actions in the RexOS development process. It serves as a persistent record of our progress that we can refer to at any time. Each action is timestamped to provide a detailed chronology of development.
+
+## 2023-04-29
+
+### Initial Setup
+- [2023-04-29 22:00] Created AI_Assistant_Guidelines.md with initial guidelines for RexOS development
+- [2023-04-29 22:05] Added System Terminology section to guidelines
+- [2023-04-29 22:10] Added Development Approach section to guidelines
+- [2023-04-29 22:15] Added Data Storage section to guidelines
+- [2023-04-29 22:20] Added Message Classification section to guidelines
+- [2023-04-29 22:25] Added Session Handling section to guidelines
+- [2023-04-29 22:30] Added Documentation Style section to guidelines
+- [2023-04-29 22:35] Added Code Management section to guidelines
+- [2023-04-29 22:40] Added Development Workflow section to guidelines
+- [2023-04-29 22:45] Added Workflow Optimization section to guidelines
+- [2023-04-29 22:50] Added Initial Context Gathering section to guidelines
+- [2023-04-29 22:55] Added Database Schema Management section to guidelines
+
+### Code Development
+- [2023-04-29 23:00] Created code folder for storing all code files
+- [2023-04-29 23:05] Created "Classify node code current.js" with message classification logic
+- [2023-04-29 23:10] Updated message classification code to handle image captions properly
+- [2023-04-29 23:15] Created "Restore Caption node code current.js" for WhatsApp image processing workflow
+
+### Development Tracking
+- [2023-04-29 23:20] Created development/DONE_LIST.md for tracking completed actions
+- [2023-04-29 23:25] Created development/TO_DO_LIST.md for tracking upcoming tasks
+- [2023-04-29 23:30] Created development/CHALLENGES.md for tracking development challenges
+- [2023-04-29 23:35] Created development/FUNCTIONAL_CHANGES.md for tracking functional changes
+
+### Database Schema Management
+- [2023-04-29 23:40] Created "current approved tables.md" in the "current tables in db" folder
+- [2023-04-29 23:45] Documented the existing tasks.csv schema in the approved tables list

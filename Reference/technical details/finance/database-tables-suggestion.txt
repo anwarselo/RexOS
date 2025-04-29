@@ -1,0 +1,230 @@
+-- Create the finance schema
+CREATE SCHEMA finance;
+
+-- Set search path
+SET search_path TO finance, extensions, public;
+
+-- Create custom ENUM types
+CREATE TYPE finance.account_type AS ENUM ('Checking', 'Savings', 'Investment', 'Retirement', 'Credit Card', 'Loan', 'Other');
+CREATE TYPE finance.transaction_type AS ENUM ('Debit', 'Credit');
+CREATE TYPE finance.category_type AS ENUM ('Income', 'Expense', 'Transfer');
+CREATE TYPE finance.investment_type AS ENUM ('Stock', 'Bond', 'Mutual Fund', 'ETF', 'Real Estate', 'Cryptocurrency', 'Other');
+CREATE TYPE finance.asset_type AS ENUM ('Real Estate', 'Vehicle', 'Collectibles', 'Other');
+CREATE TYPE finance.liability_type AS ENUM ('Mortgage', 'Auto Loan', 'Student Loan', 'Credit Card', 'Personal Loan', 'Other');
+CREATE TYPE finance.goal_type AS ENUM ('Retirement', 'Home Purchase', 'Education', 'Travel', 'Emergency Fund', 'Other');
+CREATE TYPE finance.assumption_type AS ENUM ('Inflation Rate', 'Investment Return', 'Tax Rate', 'Salary Growth');
+CREATE TYPE finance.policy_type AS ENUM ('Life', 'Health', 'Auto', 'Homeowners', 'Disability', 'Umbrella', 'Other');
+CREATE TYPE finance.freq_type AS ENUM ('Weekly', 'BiWeekly', 'Monthly', 'Quarterly', 'Annually');
+CREATE TYPE finance.premium_freq AS ENUM ('Monthly', 'Quarterly', 'Annually');
+CREATE TYPE finance.sharia_compliance AS ENUM ('High', 'Medium', 'Low', 'Not Rated');
+CREATE TYPE finance.operation_type AS ENUM ('Insert', 'Update', 'Delete');
+
+-- Create Users table
+CREATE TABLE finance."Users" (
+  user_id UUID PRIMARY KEY,
+  first_name TEXT,
+  last_name TEXT,
+  email TEXT UNIQUE,
+  risk_tolerance INTEGER CHECK (risk_tolerance BETWEEN 1 AND 10),
+  financial_goals JSONB,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Create Accounts table
+CREATE TABLE finance."Accounts" (
+  account_id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
+  user_id UUID REFERENCES finance."Users"(user_id),
+  account_type finance.account_type,
+  account_name TEXT,
+  institution_name TEXT,
+  balance NUMERIC,
+  interest_rate NUMERIC,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Create Categories table
+CREATE TABLE finance."Categories" (
+  category_id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
+  user_id UUID REFERENCES finance."Users"(user_id),
+  category_name TEXT,
+  category_type finance.category_type,
+  is_default BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Create Transactions table
+CREATE TABLE finance."Transactions" (
+  transaction_id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
+  account_id UUID REFERENCES finance."Accounts"(account_id),
+  transaction_date DATE,
+  description TEXT,
+  amount NUMERIC,
+  transaction_type finance.transaction_type,
+  category_id UUID REFERENCES finance."Categories"(category_id),
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Create Budgets table
+CREATE TABLE finance."Budgets" (
+  budget_id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
+  user_id UUID REFERENCES finance."Users"(user_id),
+  category_id UUID REFERENCES finance."Categories"(category_id),
+  budget_period DATE,
+  budgeted_amount NUMERIC,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Create Investments table
+CREATE TABLE finance."Investments" (
+  investment_id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
+  account_id UUID REFERENCES finance."Accounts"(account_id),
+  investment_name TEXT,
+  investment_type finance.investment_type,
+  ticker_symbol TEXT,
+  quantity NUMERIC,
+  purchase_date DATE,
+  purchase_price NUMERIC,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Create Investment_Prices table
+CREATE TABLE finance."Investment_Prices" (
+  investment_price_id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
+  investment_id UUID REFERENCES finance."Investments"(investment_id),
+  price_date DATE,
+  price NUMERIC,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Create Assets table
+CREATE TABLE finance."Assets" (
+  asset_id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
+  user_id UUID REFERENCES finance."Users"(user_id),
+  asset_type finance.asset_type,
+  asset_name TEXT,
+  purchase_date DATE,
+  purchase_price NUMERIC,
+  current_value NUMERIC,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Create Liabilities table
+CREATE TABLE finance."Liabilities" (
+  liability_id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
+  user_id UUID REFERENCES finance."Users"(user_id),
+  liability_type finance.liability_type,
+  liability_name TEXT,
+  original_amount NUMERIC,
+  current_balance NUMERIC,
+  interest_rate NUMERIC,
+  monthly_payment NUMERIC,
+  start_date DATE,
+  end_date DATE,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Create Goals table
+CREATE TABLE finance."Goals" (
+  goal_id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
+  user_id UUID REFERENCES finance."Users"(user_id),
+  goal_name TEXT,
+  goal_type finance.goal_type,
+  target_amount NUMERIC,
+  target_date DATE,
+  current_progress NUMERIC DEFAULT 0,
+  priority INTEGER CHECK (priority BETWEEN 1 AND 5),
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Create Assumptions table
+CREATE TABLE finance."Assumptions" (
+  assumption_id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
+  user_id UUID REFERENCES finance."Users"(user_id),
+  assumption_name TEXT,
+  assumption_type finance.assumption_type,
+  value NUMERIC,
+  start_date DATE,
+  end_date DATE,
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(user_id, assumption_name)
+);
+
+-- Create InsurancePolicies table
+CREATE TABLE finance."InsurancePolicies" (
+  policy_id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
+  user_id UUID REFERENCES finance."Users"(user_id),
+  policy_type finance.policy_type,
+  insurance_company TEXT,
+  policy_number TEXT,
+  coverage_amount NUMERIC,
+  premium_amount NUMERIC,
+  premium_frequency finance.premium_freq,
+  start_date DATE,
+  end_date DATE,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Create IslamicInvestments table
+CREATE TABLE finance."IslamicInvestments" (
+  investment_id UUID PRIMARY KEY REFERENCES finance."Investments"(investment_id),
+  sharia_compliance_rating finance.sharia_compliance,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Create ZakatCalculations table
+CREATE TABLE finance."ZakatCalculations" (
+  zakat_id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
+  user_id UUID REFERENCES finance."Users"(user_id),
+  calculation_date DATE,
+  total_assets NUMERIC,
+  deductible_liabilities NUMERIC,
+  nisab_value NUMERIC,
+  zakat_due NUMERIC,
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Create AuditLog table
+CREATE TABLE finance."AuditLog" (
+  log_id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
+  table_name TEXT,
+  record_id UUID,
+  user_id UUID REFERENCES finance."Users"(user_id),
+  operation_type finance.operation_type,
+  old_values JSONB,
+  new_values JSONB,
+  timestamp TIMESTAMPTZ DEFAULT now()
+);
+
+-- Create RecurringTransactions table
+CREATE TABLE finance."RecurringTransactions" (
+  recurring_transaction_id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
+  account_id UUID REFERENCES finance."Accounts"(account_id),
+  description TEXT,
+  amount NUMERIC,
+  transaction_type finance.transaction_type,
+  category_id UUID REFERENCES finance."Categories"(category_id),
+  frequency finance.freq_type,
+  start_date DATE,
+  end_date DATE,
+  next_occurrence_date DATE,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);

@@ -1,0 +1,78 @@
+Based on the "Intelligent Qur’an Memorization System" documentation and our conversation, here are some algorithms outlining the key components of the memorization architecture managed by Agent Abdullah:
+
+**1. User Profile Initialization and Access:**
+
+*   **START**
+*   Identify User.
+*   Retrieve User Memorization Profile from **Baserow**.
+*   If Profile does not exist:
+    *   Create new User Memorization Profile in **Baserow** with default settings (e.g., personal goals, university commitments if applicable, preferred memorization method - default to **NRLT + Spaced Repetition**).
+*   Access current **Memorization Progress** (chapters memorized, current position), **Academic Commitments**, and **Personal Goals** from the User Profile.
+*   **END**
+
+**2. Scheduling Algorithm (NRLT + Spaced Repetition):**
+
+*   **INPUT:** User Memorization Profile (including current progress, goals), current date.
+*   Determine the next **New Memorization** session based on the user's weekly goal (e.g., 2.5 pages on Fridays) and current position.
+*   Schedule **Recent Review** sessions for ayahs memorized in the last 1-7 days, with increasing intervals (e.g., after 24 hours, 48 hours, 1 week).
+*   Schedule **Long-Term Review** sessions for previously memorized sections (Juz', half-Juz', etc.) at progressively longer intervals (e.g., monthly, quarterly), potentially rotating through different sections.
+*   Schedule **Deep Review** sessions focusing on passively recalling and revisiting previously identified **weak ayahs**.
+*   Schedule periodic **Mock Recitation Days** for comprehensive retention testing.
+*   Integrate scheduled sessions into **Google Calendar** using **n8n workflows**.
+*   **OUTPUT:** Scheduled memorization events in Google Calendar.
+
+**3. Automated Reminder Algorithm:**
+
+*   **INPUT:** Scheduled memorization events in Google Calendar.
+*   For each upcoming scheduled event:
+    *   Determine the reminder time (e.g., 15 minutes before).
+    *   Using **n8n workflows**, trigger a reminder notification via **Google Calendar** (default) and potentially other configured channels within RexOS (e.g., WhatsApp/email).
+*   **OUTPUT:** Timely reminders to the user for scheduled memorization activities.
+
+**4. Adaptive Recitation Testing Algorithm:**
+
+*   **TRIGGER:** Scheduled **Smart Recitation Test** (via **n8n**).
+*   **Test Type Selection:** Randomly select a test type or prioritize based on past performance (e.g., more **Middle Ayah Recall** for users struggling with contextual memory).
+*   **Last Word - Next Word Challenge:**
+    *   Select a memorized ayah.
+    *   Determine the difficulty level based on the user's past performance (Easy, Medium, Hard).
+    *   **Easy:** Provide the last word of the current ayah and the first word of the next.
+    *   **Medium:** Provide only the last word of the current ayah.
+    *   **Hard:** Provide minimal hints (e.g., only the Surah name).
+    *   Prompt the user to recite the full next ayah.
+    *   Record the user's response and compare it to the correct ayah.
+    *   Update the **Testing Records Collection** in **Baserow** with the result.
+*   **Middle Ayah Recall:**
+    *   Select two non-consecutive memorized ayahs with at least one ayah in between.
+    *   Prompt the user to recite the ayah(s) in between.
+    *   Record the user's response and compare it to the correct ayah(s).
+    *   Update the **Testing Records Collection** in **Baserow** with the result.
+*   **OUTPUT:** Test results recorded in **Baserow**, identification of incorrect recitations.
+
+**5. Weak Ayah Identification Algorithm:**
+
+*   **INPUT:** **Testing Records Collection** in **Baserow**.
+*   Analyze the test results to identify ayahs that the user frequently misrecites.
+*   Update the User Memorization Profile in **Baserow**, flagging these ayahs as **weak ayahs**.
+*   **OUTPUT:** List of weak ayahs associated with the user in their profile.
+
+**6. Dynamic Study Plan Adjustment Algorithm:**
+
+*   **INPUT:** User Memorization Profile data in **Baserow** (including progress, review completion, weak ayahs, Tarteel scores if manually entered), scheduled events in **Google Calendar**.
+*   Analyze the user's progress:
+    *   Rate of new memorization.
+    *   Consistency of review completion.
+    *   Performance on recitation tests.
+    *   Frequency of errors on specific ayahs (**weak ayahs**).
+*   If the user is consistently struggling with new memorization or forgetting reviewed material:
+    *   Consider reducing the pace of new memorization.
+    *   Increase the frequency of **Recent Review** sessions.
+    *   Prioritize **Deep Review** sessions focusing on **weak ayahs**.
+*   If the user is progressing well:
+    *   Maintain the current pace or consider a slight increase if aligned with goals.
+    *   Adjust **Long-Term Review** intervals based on retention.
+*   Using **n8n workflows**, modify the scheduled events in **Google Calendar** to reflect the adjusted plan.
+*   Communicate any significant changes to the study plan to the user (potentially via RexOS notification channels).
+*   **OUTPUT:** Dynamically updated memorization schedule in Google Calendar.
+
+These algorithms illustrate the core logic of the Intelligent Qur’an Memorization System, emphasizing the data flow between **Baserow**, **n8n**, and **Google Calendar**, all orchestrated by Agent Abdullah to create a personalized and adaptive learning experience.

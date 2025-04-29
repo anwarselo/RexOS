@@ -1,0 +1,6 @@
+investment_id,account_id,investment_name,investment_type,ticker_symbol,quantity,purchase_date,purchase_price
+1,4,Vanguard Total Stock Market,ETF,VTI,100,2024-01-15,250.75
+2,4,Apple Inc.,Stock,AAPL,50,2024-02-10,175.84
+3,4,US Treasury Bond,Bond,GOVT,200,2024-03-05,25.30
+4,4,Fidelity 500 Index,Mutual Fund,FXAIX,75,2024-01-20,150.25
+5,4,Bitcoin,Cryptocurrency,BTC,0.5,2024-02-25,52000.00

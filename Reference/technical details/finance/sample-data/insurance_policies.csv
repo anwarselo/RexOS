@@ -1,0 +1,6 @@
+insurance_policy_id,user_id,policy_type,insurance_company,policy_number,coverage_amount,premium_amount,premium_frequency,start_date,end_date
+1,1,Life,MetLife,LF12345678,500000,150,Monthly,2022-01-15,2042-01-15
+2,1,Health,Blue Cross,HC98765432,1000000,350,Monthly,2023-01-01,2024-12-31
+3,1,Auto,Geico,AU45678901,50000,120,Monthly,2022-03-10,2023-03-10
+4,1,Homeowners,State Farm,HO56789012,400000,125,Monthly,2020-05-15,2025-05-15
+5,1,Disability,Guardian,DI34567890,200000,75,Monthly,2021-06-20,2031-06-20

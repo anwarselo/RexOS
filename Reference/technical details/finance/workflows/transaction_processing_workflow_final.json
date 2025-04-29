@@ -1,0 +1,310 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "path": "whatsapp-webhook",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        250,
+        300
+      ],
+      "id": "webhook-receiver",
+      "name": "Webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract message data from webhook payload\nconst body = $input.item.json.body || {};\nconst messages = body.messages || [];\n\nif (messages.length === 0) {\n  return [\n    {\n      json: {error: 'No messages found'}\n    }\n  ];\n}\n\n// Get the first message\nconst message = messages[0];\nconst messageId = message.id;\nconst from = message.from;\nconst messageText = message.text?.body || '';\n\nreturn [\n  {\n    json: {\n      messageId,\n      from,\n      message: messageText,\n      timestamp: new Date().toISOString()\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        450,
+        300
+      ],
+      "id": "extract-message",
+      "name": "Extract Message Data"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pattern matching for transaction extraction\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const messageText = item.json.message;\n\n  // Pattern 1: \"Spent $X on/at/for Y\"\n  const spentPattern = /spent\\s+\\$(\\d+(\\.\\d{1,2})?)\\s+(on|at|for)\\s+(.+)/i;\n\n  // Pattern 2: \"Paid $X for Y\"\n  const paidPattern = /paid\\s+\\$(\\d+(\\.\\d{1,2})?)\\s+(for|to)\\s+(.+)/i;\n\n  // Pattern 3: \"Received $X from Y\"\n  const receivedPattern = /received\\s+\\$(\\d+(\\.\\d{1,2})?)\\s+(from)\\s+(.+)/i;\n\n  // Pattern 4: \"$X for Y\"\n  const simplePattern = /\\$(\\d+(\\.\\d{1,2})?)\\s+(for|to|from)\\s+(.+)/i;\n\n  let match;\n  let transactionData = null;\n\n  if (match = spentPattern.exec(messageText)) {\n    transactionData = {\n      type: 'Debit',\n      amount: parseFloat(match[1]),\n      vendor: match[4].trim(),\n      category: guessCategory(match[4].trim(), 'Debit'),\n      date: new Date().toISOString().split('T')[0]\n    };\n  } else if (match = paidPattern.exec(messageText)) {\n    transactionData = {\n      type: 'Debit',\n      amount: parseFloat(match[1]),\n      vendor: match[4].trim(),\n      category: guessCategory(match[4].trim(), 'Debit'),\n      date: new Date().toISOString().split('T')[0]\n    };\n  } else if (match = receivedPattern.exec(messageText)) {\n    transactionData = {\n      type: 'Credit',\n      amount: parseFloat(match[1]),\n      source: match[4].trim(),\n      category: guessCategory(match[4].trim(), 'Credit'),\n      date: new Date().toISOString().split('T')[0]\n    };\n  } else if (match = simplePattern.exec(messageText)) {\n    const preposition = match[3].toLowerCase();\n    if (preposition === 'from') {\n      transactionData = {\n        type: 'Credit',\n        amount: parseFloat(match[1]),\n        source: match[4].trim(),\n        category: guessCategory(match[4].trim(), 'Credit'),\n        date: new Date().toISOString().split('T')[0]\n      };\n    } else {\n      transactionData = {\n        type: 'Debit',\n        amount: parseFloat(match[1]),\n        vendor: match[4].trim(),\n        category: guessCategory(match[4].trim(), 'Debit'),\n        date: new Date().toISOString().split('T')[0]\n      };\n    }\n  }\n\n  results.push({\n    json: {\n      ...item.json,\n      transactionData,\n      patternMatchSuccessful: transactionData !== null\n    }\n  });\n}\n\n// Helper function to guess category based on vendor/source\nfunction guessCategory(vendorOrSource, type) {\n  const vendorLower = vendorOrSource.toLowerCase();\n  \n  // For expenses (Debit)\n  if (type === 'Debit') {\n    if (/grocery|food|supermarket|walmart|target|costco|safeway|kroger|aldi|trader joe/i.test(vendorLower)) {\n      return 'Groceries';\n    } else if (/restaurant|cafe|coffee|starbucks|mcdonald|burger|pizza|dining|doordash|ubereats|grubhub/i.test(vendorLower)) {\n      return 'Dining Out';\n    } else if (/gas|fuel|shell|chevron|exxon|bp|marathon|speedway/i.test(vendorLower)) {\n      return 'Transportation';\n    } else if (/rent|mortgage|apartment|housing|property/i.test(vendorLower)) {\n      return 'Rent/Mortgage';\n    } else if (/electric|water|gas|utility|internet|phone|bill|cable|netflix|spotify|subscription/i.test(vendorLower)) {\n      return 'Utilities';\n    } else if (/movie|theater|concert|entertainment|game|sport|ticket/i.test(vendorLower)) {\n      return 'Entertainment';\n    } else if (/doctor|hospital|pharmacy|medical|healthcare|dental|vision/i.test(vendorLower)) {\n      return 'Healthcare';\n    } else if (/school|tuition|course|class|book|education/i.test(vendorLower)) {\n      return 'Education';\n    }\n    return 'Other';\n  }\n  \n  // For income (Credit)\n  if (type === 'Credit') {\n    if (/salary|paycheck|wage|income|employer|company|work|job/i.test(vendorLower)) {\n      return 'Salary';\n    } else if (/interest|dividend|investment|return|profit/i.test(vendorLower)) {\n      return 'Investment';\n    } else if (/refund|return|cashback|reimbursement/i.test(vendorLower)) {\n      return 'Refund';\n    } else if (/gift|present/i.test(vendorLower)) {\n      return 'Gift';\n    }\n    return 'Other Income';\n  }\n  \n  return 'Other';\n}\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        650,
+        300
+      ],
+      "id": "pattern-matching",
+      "name": "Pattern Matching"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.patternMatchSuccessful }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "pattern-match-check",
+      "name": "Pattern Match Successful?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        850,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer sk-00490adf5fe749de874a1e2fc654f10b"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "deepseek-chat"
+            },
+            {
+              "name": "messages",
+              "value": "=[\n  {\n    \"role\": \"system\",\n    \"content\": \"You are a financial assistant that extracts transaction information from text messages. Extract the following information: transaction type (Debit or Credit), amount, vendor/source, category, and date. If date is not specified, use today's date. Return the data in JSON format with these fields: type, amount, vendor/source, category, date.\"\n  },\n  {\n    \"role\": \"user\",\n    \"content\": \"{{ $json.message }}\"\n  }\n]"
+            },
+            {
+              "name": "temperature",
+              "value": 0.1
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ai-processing",
+      "name": "AI Processing",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1050,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the AI response\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const aiResponse = item.json.choices[0].message.content;\n  \n  // Try to extract JSON from the response\n  let transactionData;\n  try {\n    // Look for JSON pattern in the response\n    const jsonMatch = aiResponse.match(/\\{[\\s\\S]*\\}/);\n    if (jsonMatch) {\n      transactionData = JSON.parse(jsonMatch[0]);\n    } else {\n      throw new Error('No JSON found in response');\n    }\n  } catch (error) {\n    // If parsing fails, create a basic structure with the original message\n    transactionData = {\n      type: 'Unknown',\n      amount: 0,\n      vendor: 'Unknown',\n      category: 'Other',\n      date: new Date().toISOString().split('T')[0],\n      error: 'Failed to parse transaction data'\n    };\n  }\n  \n  // Ensure we have all required fields\n  transactionData.type = transactionData.type || 'Unknown';\n  transactionData.amount = transactionData.amount || 0;\n  transactionData.vendor = transactionData.vendor || transactionData.source || 'Unknown';\n  transactionData.category = transactionData.category || 'Other';\n  transactionData.date = transactionData.date || new Date().toISOString().split('T')[0];\n  \n  // Standardize type to match Airtable's expected values\n  if (transactionData.type.toLowerCase() === 'expense' || \n      transactionData.type.toLowerCase() === 'debit' || \n      transactionData.type.toLowerCase() === 'payment') {\n    transactionData.type = 'Debit';\n  } else if (transactionData.type.toLowerCase() === 'income' || \n             transactionData.type.toLowerCase() === 'credit' || \n             transactionData.type.toLowerCase() === 'deposit') {\n    transactionData.type = 'Credit';\n  }\n  \n  results.push({\n    json: {\n      ...item.json,\n      transactionData,\n      aiProcessingSuccessful: true\n    }\n  });\n}\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1250,
+        400
+      ],
+      "id": "parse-ai-response",
+      "name": "Parse AI Response"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "list",
+          "value": "appiSkYH3YcMBxbAl"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": "Transactions"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "transaction_id": "={{ $json.messageId }}",
+            "description": "={{ $json.message }}",
+            "amount": "={{ $json.transactionData.amount }}",
+            "transaction_type": "={{ $json.transactionData.type }}",
+            "Vendor/Source": "={{ $json.transactionData.vendor || $json.transactionData.source || \"Unknown\" }}",
+            "Category": "={{ $json.transactionData.category }}",
+            "transaction_date": "={{ $json.transactionData.date }}",
+            "notes": "Transaction recorded via WhatsApp"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1450,
+        300
+      ],
+      "id": "store-in-airtable",
+      "name": "Store in Airtable",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "rO1sMyyzH1qtEBvh",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.ycloud.com/v2/whatsapp/messages/sendDirectly",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "5c3ce61a90d0abd74d940b96ca0bbfaa"
+            },
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "text"
+            },
+            {
+              "name": "text",
+              "value": "={\n  \"body\": \"Transaction recorded: {{ $json.transactionData.type }} of ${{ $json.transactionData.amount }} for {{ $json.transactionData.vendor || $json.transactionData.source }} in category '{{ $json.transactionData.category }}'\",\n  \"preview_url\": true\n}"
+            },
+            {
+              "name": "from",
+              "value": "+971569119369"
+            },
+            {
+              "name": "to",
+              "value": "={{ $json.from }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "send-confirmation",
+      "name": "Send Confirmation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1650,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "webhook-receiver": {
+      "main": [
+        [
+          {
+            "node": "extract-message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extract-message": {
+      "main": [
+        [
+          {
+            "node": "pattern-matching",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "pattern-matching": {
+      "main": [
+        [
+          {
+            "node": "pattern-match-check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "pattern-match-check": {
+      "main": [
+        [
+          {
+            "node": "store-in-airtable",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ai-processing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ai-processing": {
+      "main": [
+        [
+          {
+            "node": "parse-ai-response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse-ai-response": {
+      "main": [
+        [
+          {
+            "node": "store-in-airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "store-in-airtable": {
+      "main": [
+        [
+          {
+            "node": "send-confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
