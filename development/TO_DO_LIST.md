@@ -5,9 +5,11 @@ This file outlines the upcoming tasks and next steps for the RexOS development p
 ## High Priority Tasks
 
 ### WhatsApp Integration
-- [ ] Fix image caption handling in WhatsApp message processing workflow
-- [ ] Test end-to-end message flow with image captions
-- [ ] Implement proper classification for all message types
+- [x] Split message processing into separate streams for different message types
+- [ ] Implement text message processing stream
+- [ ] Implement image processing stream with vision model integration
+- [ ] Implement audio transcription stream
+- [ ] Test end-to-end message flow with all message types
 
 ### Memory Storage Implementation
 - [ ] Create workflow for storing memories in Supabase
@@ -40,26 +42,34 @@ This file outlines the upcoming tasks and next steps for the RexOS development p
 
 ## Next Immediate Steps
 
-1. **Test and refine image caption handling**
-   - Verify classification works correctly with image captions
-   - Test with various types of captions
-   - Ensure proper data flow through the workflow
+1. **Implement text processing stream**
+   - Create dedicated function node for text message processing
+   - Ensure proper data flow and error handling
+   - Test with various text message formats
 
-2. **Implement memory storage in Supabase**
+2. **Implement image processing stream**
+   - Complete media URL retrieval and download functionality
+   - Integrate with vision model for image analysis
+   - Implement caption extraction and interpretation
+   - Test with various image types and captions
+
+3. **Implement audio transcription stream**
+   - Create dedicated function node for audio message processing
+   - Implement media download for audio files
+   - Integrate with transcription service
+   - Test with various audio message types
+
+4. **Implement memory storage in Supabase**
    - Create necessary tables in Supabase
    - Develop workflow for storing classified memories
    - Test storage and retrieval functionality
 
-3. **Enhance error handling**
-   - Add robust error handling to all nodes
-   - Implement logging for debugging
-   - Create recovery mechanisms for common failure points
-
 ## Notes and Considerations
 
-- Prioritize fixing the image caption handling issue
-- Focus on core functionality before adding new features
-- Ensure all code is properly documented and stored according to guidelines
+- Prioritize implementing the separate processing streams for better maintainability
+- Focus on proper media handling for images and audio before adding advanced features
+- Ensure robust error handling in each processing stream
+- Test each stream independently before integrating them
 - Update the Done List after completing each action with precise timestamps
 
 > **Note**: This To Do List is a living document and will be updated regularly as tasks are completed and new priorities emerge. Completed tasks will be moved to the [DONE_LIST.md](./DONE_LIST.md) file with appropriate timestamps.

@@ -2,6 +2,19 @@
 
 This document tracks significant functional changes, additions, and removals in the RexOS system. It serves as a reference for updating documentation and understanding how the system's capabilities have evolved over time.
 
+## 2023-04-30
+
+### Modified Functionality
+
+#### Message Processing Architecture
+- **Previous Approach**: Used a single comprehensive message processor for all message types (text, image, audio)
+- **New Approach**: Split into two separate processing streams:
+  1. Text Stream: Handles both direct text messages and transcribed audio messages
+  2. Visual Stream: Processes images through media download, vision model analysis, and caption interpretation
+- **Motivation**: Improve troubleshooting capabilities and system maintainability
+- **Impact**: Easier debugging, more specialized processing for each content type
+- **Documentation Updates Needed**: WhatsApp integration documentation, system architecture documentation
+
 ## 2023-04-29
 
 ### Added Functionality
