@@ -4,13 +4,30 @@ This document tracks significant functional changes, additions, and removals in 
 
 ## 2023-04-30
 
+### Added Functionality
+
+#### Comprehensive Message Processing System
+- **Description**: Implemented a complete message processing system with specialized streams for different content types
+- **Components Added**:
+  - STDRD_node_code_current.js: Standardizes messages from different sources
+  - Classify_node_code_current.js: Classifies messages for appropriate handling
+  - Switch_node_code_current.js: Routes messages to appropriate processing streams
+  - Multiple media handling nodes for URL retrieval and download
+  - Image_Analyzer_node_code_current.js: Processes images with vision model
+  - Voice_Transcriber_node_code_current.js: Transcribes audio to text
+- **Motivation**: Enable robust handling of various message types with specialized processing
+- **Impact**: Users can interact with the system using text, images, audio, and documents
+- **Documentation Updates Needed**: WhatsApp integration documentation, system architecture documentation
+
 ### Modified Functionality
 
 #### Message Processing Architecture
 - **Previous Approach**: Used a single comprehensive message processor for all message types (text, image, audio)
-- **New Approach**: Split into two separate processing streams:
-  1. Text Stream: Handles both direct text messages and transcribed audio messages
-  2. Visual Stream: Processes images through media download, vision model analysis, and caption interpretation
+- **New Approach**: Split into multiple specialized processing streams:
+  1. Text Stream: Handles direct text messages
+  2. Image Stream: Processes images through media download, vision model analysis, and caption interpretation
+  3. Audio Stream: Transcribes audio messages to text for processing
+  4. Document Stream: Handles document storage and processing
 - **Motivation**: Improve troubleshooting capabilities and system maintainability
 - **Impact**: Easier debugging, more specialized processing for each content type
 - **Documentation Updates Needed**: WhatsApp integration documentation, system architecture documentation

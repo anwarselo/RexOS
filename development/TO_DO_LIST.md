@@ -6,9 +6,13 @@ This file outlines the upcoming tasks and next steps for the RexOS development p
 
 ### WhatsApp Integration
 - [x] Split message processing into separate streams for different message types
-- [ ] Implement text message processing stream
-- [ ] Implement image processing stream with vision model integration
-- [ ] Implement audio transcription stream
+- [x] Create code files for all nodes in the message processing workflow
+- [x] Implement message type routing with Switch node
+- [x] Implement media URL retrieval and download functionality
+- [ ] Complete text message processing stream with classification and action determination
+- [ ] Complete image processing stream with vision model analysis and interpretation
+- [ ] Complete audio transcription stream with text conversion
+- [ ] Implement message merging for standardized processing after streams
 - [ ] Test end-to-end message flow with all message types
 
 ### Memory Storage Implementation
@@ -40,26 +44,33 @@ This file outlines the upcoming tasks and next steps for the RexOS development p
 - [ ] Add support for voice messages
 - [ ] Create dashboard for system monitoring
 
-## Next Immediate Steps
+## Next Immediate Steps for 2023-05-01
 
-1. **Implement text processing stream**
-   - Create dedicated function node for text message processing
-   - Ensure proper data flow and error handling
-   - Test with various text message formats
+1. **Complete text processing stream**
+   - Finalize text message classification logic
+   - Implement action determination based on classification
+   - Add error handling and logging
+   - Test with various text message formats and languages
 
-2. **Implement image processing stream**
-   - Complete media URL retrieval and download functionality
-   - Integrate with vision model for image analysis
-   - Implement caption extraction and interpretation
-   - Test with various image types and captions
+2. **Complete image processing stream**
+   - Finalize vision model integration for image analysis
+   - Implement caption and image content correlation
+   - Add error handling for image processing failures
+   - Test with various image types, sizes, and captions
 
-3. **Implement audio transcription stream**
-   - Create dedicated function node for audio message processing
-   - Implement media download for audio files
-   - Integrate with transcription service
-   - Test with various audio message types
+3. **Complete audio transcription stream**
+   - Finalize transcription service integration
+   - Implement post-transcription text processing
+   - Add error handling for audio processing failures
+   - Test with various audio message types and languages
 
-4. **Implement memory storage in Supabase**
+4. **Implement stream merging**
+   - Create mechanism to merge processed messages from all streams
+   - Ensure consistent data format for downstream processing
+   - Implement priority handling for different message types
+   - Test combined processing with mixed message types
+
+5. **Begin memory storage implementation**
    - Create necessary tables in Supabase
    - Develop workflow for storing classified memories
    - Test storage and retrieval functionality

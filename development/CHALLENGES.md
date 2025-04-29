@@ -12,15 +12,31 @@ This document tracks challenges encountered during the RexOS development process
 - **Root Cause**: The code was checking messageType and immediately returning "unclassifiable" for non-text types
 - **Lessons Learned**: Need to consider all message components (not just type) when designing classification logic
 
+### Message Processing Complexity
+- **Challenge**: Single processing path for all message types was becoming difficult to maintain and debug
+- **Date Encountered**: 2023-04-30
+- **Resolution Date**: 2023-04-30
+- **Solution**: Split message processing into separate streams based on content type (text, image, audio, document)
+- **Root Cause**: Different message types require specialized handling that was becoming unwieldy in a single flow
+- **Lessons Learned**: Specialized processing streams improve maintainability and make troubleshooting easier
+
 ## Ongoing Challenges
 
-### WhatsApp Message Processing
-- **Challenge**: Ensuring consistent message processing across different message types (text, image, voice)
-- **Date Encountered**: 2023-04-29
-- **Current Status**: Partially resolved for text and images with captions
-- **Attempted Solutions**: Created specialized handling for image captions
-- **Next Steps**: Test with more message types and edge cases
-- **Impact**: Affects the reliability of the message classification system
+### Media Processing Integration
+- **Challenge**: Ensuring reliable media download and processing for various media types and sizes
+- **Date Encountered**: 2023-04-30
+- **Current Status**: Basic implementation complete, needs testing with various media types
+- **Attempted Solutions**: Created separate processing streams for each media type
+- **Next Steps**: Test with various media formats, sizes, and edge cases
+- **Impact**: Affects the system's ability to process non-text content reliably
+
+### Stream Merging
+- **Challenge**: Merging processed content from different streams for consistent downstream processing
+- **Date Encountered**: 2023-04-30
+- **Current Status**: Design phase, implementation pending
+- **Attempted Solutions**: Researching best approaches for stream merging
+- **Next Steps**: Implement stream merging mechanism
+- **Impact**: Affects the consistency of message processing after specialized handling
 
 ### Workflow Complexity Management
 - **Challenge**: Keeping n8n workflows manageable and maintainable as complexity increases
@@ -45,6 +61,20 @@ This document tracks challenges encountered during the RexOS development process
 - **Research Needed**: Arabic language patterns for memory and task commands
 
 ## Decision Log
+
+### Message Processing Architecture
+- **Decision**: Split message processing into separate streams based on content type
+- **Date**: 2023-04-30
+- **Rationale**: Improves maintainability, makes troubleshooting easier, and allows for specialized processing
+- **Alternatives Considered**: Enhanced single-stream processing, hybrid approach
+- **Decision Maker**: Development team
+
+### Media Processing Approach
+- **Decision**: Use two-step process (URL retrieval followed by download) for all media types
+- **Date**: 2023-04-30
+- **Rationale**: Follows WhatsApp API requirements and provides consistent handling across media types
+- **Alternatives Considered**: Direct media download, third-party media processing services
+- **Decision Maker**: Development team
 
 ### Message Classification Approach
 - **Decision**: Use pattern matching for initial classification, with potential for LLM enhancement later

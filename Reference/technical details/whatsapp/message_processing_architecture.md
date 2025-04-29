@@ -8,36 +8,51 @@ The RexOS message processing system is designed to handle various types of Whats
 
 ## Architecture
 
-The message processing is divided into two main streams:
+The message processing is divided into four specialized streams:
 
 ### 1. Text Processing Stream
 
-This stream handles all text-based content, including:
-- Direct text messages from users
-- Transcribed audio messages
+This stream handles direct text messages from users.
 
 **Processing Flow:**
-1. Message type detection
-2. For text messages: Direct routing to text processing
-3. For audio messages:
-   - Media URL retrieval
-   - Audio file download
-   - Transcription to text
-   - Routing to text processing
-4. Text analysis and classification
-5. Action determination based on content
+1. Message type detection (via Switch node)
+2. Text message routing to text processing
+3. Text analysis and classification
+4. Action determination based on content
 
-### 2. Visual Processing Stream
+### 2. Image Processing Stream
 
 This stream handles image-based content:
 
 **Processing Flow:**
-1. Media URL retrieval
-2. Image file download
-3. Vision model analysis
-4. Caption extraction (if present)
+1. Media URL retrieval (via Image Media URL Retrieval node)
+2. Image file download (via Image Media Download node)
+3. Vision model analysis (via Image Analyzer node)
+4. Caption extraction and interpretation
 5. LLM interpretation of visual content
 6. Action determination based on visual analysis
+
+### 3. Audio Processing Stream
+
+This stream handles voice messages:
+
+**Processing Flow:**
+1. Media URL retrieval (via Voice Media URL Retrieval node)
+2. Audio file download (via Voice Media Download node)
+3. Transcription to text (via Voice Transcriber node)
+4. Text analysis of transcribed content
+5. Action determination based on transcribed content
+
+### 4. Document Processing Stream
+
+This stream handles document messages:
+
+**Processing Flow:**
+1. Media URL retrieval (via Document Media URL Retrieval node)
+2. Document file download (via Document Media Download node)
+3. Document storage (via Google Drive node)
+4. Metadata extraction and processing
+5. Action determination based on document type and content
 
 ## Implementation Details
 
@@ -93,4 +108,4 @@ Images are analyzed using a vision model to extract content information, which i
 
 ---
 
-*Last Updated: 2023-04-30*
+*Last Updated: 2023-04-30 13:45*
