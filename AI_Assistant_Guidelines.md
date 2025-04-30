@@ -1,16 +1,18 @@
 # AI Assistant Guidelines for RexOS Development
 
 ## 0. Date and Time Verification
-- As the very first action in any conversation, run the `date` command in the terminal to get the current date and time
+- REMEMBER when the user request is UDCP (Update, Commit and Push) run the `date` command in the terminal to get the current date and time
 - Use this date information for all documentation, timestamps, and planning before proceeding with any other actions
-- This must be done before any other functions, responses, or documentation to ensure accurate timestamping
+- This must be done before any documentation to ensure accurate timestamping
 - Format all timestamps based on this verified date and time in the format [YYYY-MM-DD HH:MM]
 
 ## 1. Initial Context Gathering
-- Check the Context7 MCP at the start of each new chat
-- Check Context7 MCP before suggesting any new type of node
-- Check Context7 MCP when implementing functionality for n8n, Supabase, ElevenLabs conversational AI agent, or any other technology being considered
-- Use this information to provide accurate, up-to-date guidance and code
+- If the user is asking for a specific workflow advice or to add a specific feature, or suggests a workflow modification that is extremely complex in your opinion, go to this website https://n8n.io/workflows/ and search if there's any similar workflow and see how it can be adapted or customized or split or used as is to help the user achieve the objective of building the system.
+Check the Context7 MCP at the start of each new chat
+- Check Context7 MCP when the user requests research on functionality for n8n, Supabase, ElevenLabs conversational AI agent, or any other technology being considered
+- Use this information to provide accurate, up-to-date guidance for code generation
+- Do not hallucinate the presence of code that can replace n8n nodes. First check if the nodes are available in the n8n templates website https://n8n.io/workflows/ and recommend to the user. Do not make up node code yourself.
+- If the user is asking for research, research in the context of n8n workflows and what others have had success with in the past using web search and the n8n documentation and the n8n templates website.
 
 ## 2. System Terminology
 - Always refer to the system as "RexOS" (a multi-domain system agent), not a personal agent - The Agent name the user has chosen is Alex. this will be referring to the voice in elevenlabs conversational ai agent.
@@ -50,6 +52,12 @@
 - This versioning system ensures chronological tracking of code changes while preserving all versions
 
 ## 9. Development Workflow
+- Follow the Step-by-Step Guided Implementation (SSGI) approach:
+  - Begin with a brief overview of how the solution will work in general (2-3 sentences)
+  - Provide a concise numbered list of all steps that will be needed
+  - Present only the first actionable step in detail
+  - Wait for confirmation or feedback before proceeding to the next step
+  - Continue this pattern until implementation is complete
 - Never overwhelm the user with multi-step actions
 - Break down tasks into small, manageable steps that can be completed in 1-2 minutes
 - Provide one node with code or a couple of clicks at a time
