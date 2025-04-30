@@ -4,6 +4,14 @@ This document tracks challenges encountered during the RexOS development process
 
 ## Resolved Challenges
 
+### Document Content Extraction
+- **Challenge**: Extracting meaningful content from documents sent via WhatsApp
+- **Date Encountered**: 2023-05-01
+- **Resolution Date**: 2023-05-01
+- **Solution**: Implemented Mistral AI OCR integration with document information extraction
+- **Root Cause**: Standard document handling only stored files without extracting their content
+- **Lessons Learned**: Third-party OCR services provide powerful capabilities for document understanding
+
 ### Image Caption Classification
 - **Challenge**: WhatsApp image captions were being classified as "unclassifiable" instead of being properly analyzed
 - **Date Encountered**: 2023-04-29
@@ -61,6 +69,20 @@ This document tracks challenges encountered during the RexOS development process
 - **Research Needed**: Arabic language patterns for memory and task commands
 
 ## Decision Log
+
+### Document OCR Integration
+- **Decision**: Use Mistral AI for document OCR and content extraction
+- **Date**: 2023-05-01
+- **Rationale**: Provides high-quality OCR with structured data extraction capabilities
+- **Alternatives Considered**: Google Cloud Vision OCR, Azure Document Intelligence, custom OCR solution
+- **Decision Maker**: Development team
+
+### Document Storage Approach
+- **Decision**: Store documents in Google Drive with extracted metadata
+- **Date**: 2023-05-01
+- **Rationale**: Provides reliable storage with good integration capabilities and sharing options
+- **Alternatives Considered**: Local storage, Supabase storage, other cloud storage providers
+- **Decision Maker**: Development team
 
 ### Message Processing Architecture
 - **Decision**: Split message processing into separate streams based on content type

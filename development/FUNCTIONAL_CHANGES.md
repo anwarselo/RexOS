@@ -2,6 +2,24 @@
 
 This document tracks significant functional changes, additions, and removals in the RexOS system. It serves as a reference for updating documentation and understanding how the system's capabilities have evolved over time.
 
+## 2023-05-01
+
+### Added Functionality
+
+#### Advanced Document Processing Capabilities
+- **Description**: Implemented comprehensive document processing with OCR and content extraction
+- **Components Added**:
+  - Document_Media_URL_Retrieval_node_code_current.js: Retrieves document URLs from WhatsApp
+  - Document_Media_Download_node_code_current.js: Downloads document content
+  - Document_Save_to_GDrive_node_code_current.js: Stores documents in Google Drive
+  - Upload_to_Mistral_node_code_current.js: Sends documents to Mistral AI for OCR
+  - Get_File_URL_node_code_current.js: Retrieves document URL for OCR processing
+  - Get_OCR_Results_node_code_current.js: Retrieves OCR results from Mistral AI
+  - Document_Information_Extractor_node_code_current.js: Extracts structured data from documents
+- **Motivation**: Enable robust document processing and information extraction
+- **Impact**: Users can send documents via WhatsApp and have their content extracted and stored
+- **Documentation Updates Needed**: Document processing documentation, WhatsApp integration documentation
+
 ## 2023-04-30
 
 ### Added Functionality

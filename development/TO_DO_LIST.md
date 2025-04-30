@@ -9,6 +9,7 @@ This file outlines the upcoming tasks and next steps for the RexOS development p
 - [x] Create code files for all nodes in the message processing workflow
 - [x] Implement message type routing with Switch node
 - [x] Implement media URL retrieval and download functionality
+- [x] Complete document processing stream with OCR and content extraction
 - [ ] Complete text message processing stream with classification and action determination
 - [ ] Complete image processing stream with vision model analysis and interpretation
 - [ ] Complete audio transcription stream with text conversion
@@ -44,33 +45,40 @@ This file outlines the upcoming tasks and next steps for the RexOS development p
 - [ ] Add support for voice messages
 - [ ] Create dashboard for system monitoring
 
-## Next Immediate Steps for 2023-05-01
+## Next Immediate Steps for 2023-05-02
 
-1. **Complete text processing stream**
+1. **Enhance document processing capabilities**
+   - Implement document type detection for specialized handling
+   - Add support for extracting structured data from common document formats
+   - Create database schema for storing document metadata
+   - Implement search functionality for document content
+   - Test with various document formats (PDF, DOC, images of documents)
+
+2. **Complete text processing stream**
    - Finalize text message classification logic
    - Implement action determination based on classification
    - Add error handling and logging
    - Test with various text message formats and languages
 
-2. **Complete image processing stream**
+3. **Complete image processing stream**
    - Finalize vision model integration for image analysis
    - Implement caption and image content correlation
    - Add error handling for image processing failures
    - Test with various image types, sizes, and captions
 
-3. **Complete audio transcription stream**
+4. **Complete audio transcription stream**
    - Finalize transcription service integration
    - Implement post-transcription text processing
    - Add error handling for audio processing failures
    - Test with various audio message types and languages
 
-4. **Implement stream merging**
+5. **Implement stream merging**
    - Create mechanism to merge processed messages from all streams
    - Ensure consistent data format for downstream processing
    - Implement priority handling for different message types
    - Test combined processing with mixed message types
 
-5. **Begin memory storage implementation**
+6. **Begin memory storage implementation**
    - Create necessary tables in Supabase
    - Develop workflow for storing classified memories
    - Test storage and retrieval functionality
