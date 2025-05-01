@@ -30,6 +30,14 @@ This document tracks challenges encountered during the RexOS development process
 
 ## Ongoing Challenges
 
+### Workflow Size and Complexity
+- **Challenge**: The n8n workflow has grown too large, making it error-prone and difficult to maintain
+- **Date Encountered**: 2025-05-02
+- **Current Status**: Developed incremental refactoring strategy to address without rebuilding from scratch
+- **Attempted Solutions**: Created workflow_refactoring_strategy.md with step-by-step approach
+- **Next Steps**: Begin extracting Google Drive functionality as first sub-workflow
+- **Impact**: Affects system reliability, maintainability, and ability to add new features
+
 ### Media Processing Integration
 - **Challenge**: Ensuring reliable media download and processing for various media types and sizes
 - **Date Encountered**: 2023-04-30
@@ -69,6 +77,13 @@ This document tracks challenges encountered during the RexOS development process
 - **Research Needed**: Arabic language patterns for memory and task commands
 
 ## Decision Log
+
+### Workflow Refactoring Approach
+- **Decision**: Use incremental refactoring instead of rebuilding the workflow from scratch
+- **Date**: 2025-05-02
+- **Rationale**: Preserves existing functionality while gradually improving architecture
+- **Alternatives Considered**: Complete rebuild, continuing with monolithic workflow
+- **Decision Maker**: Development team
 
 ### Document OCR Integration
 - **Decision**: Use Mistral AI for document OCR and content extraction

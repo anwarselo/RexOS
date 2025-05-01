@@ -4,6 +4,15 @@ This file outlines the upcoming tasks and next steps for the RexOS development p
 
 ## High Priority Tasks
 
+### Workflow Refactoring
+- [ ] [2025-05-02 00:05] Implement incremental workflow refactoring strategy
+- [ ] [2025-05-02 00:05] Extract Google Drive functionality into Sub_Save_To_GDrive sub-workflow
+- [ ] [2025-05-02 00:05] Extract Document processing path into Sub_Process_Document sub-workflow
+- [ ] [2025-05-02 00:05] Extract Image processing path into Sub_Process_Image sub-workflow
+- [ ] [2025-05-02 00:05] Extract Audio processing path into Sub_Process_Audio sub-workflow
+- [ ] [2025-05-02 00:05] Implement improved context management with Supabase and ZEP
+- [ ] [2025-05-02 00:05] Replace hardcoded session IDs with dynamic expressions
+
 ### WhatsApp Integration
 - [x] Split message processing into separate streams for different message types
 - [x] Create code files for all nodes in the message processing workflow
@@ -12,7 +21,7 @@ This file outlines the upcoming tasks and next steps for the RexOS development p
 - [x] Complete document processing stream with OCR and content extraction
 - [ ] Complete text message processing stream with classification and action determination
 - [ ] Complete image processing stream with vision model analysis and interpretation
-- [ ] Complete audio transcription stream with text conversion
+- [x] Complete audio transcription stream with text conversion
 - [ ] Implement message merging for standardized processing after streams
 - [ ] Test end-to-end message flow with all message types
 
@@ -74,11 +83,11 @@ This file outlines the upcoming tasks and next steps for the RexOS development p
    - Add error handling for image processing failures
    - Test with various image types, sizes, and captions
 
-4. **Complete audio transcription stream**
-   - Finalize transcription service integration
-   - Implement post-transcription text processing
-   - Add error handling for audio processing failures
-   - Test with various audio message types and languages
+4. **Complete audio transcription stream** ✓
+   - ✓ Finalize transcription service integration
+   - ✓ Implement post-transcription text processing with Voice Transcription Function node
+   - ✓ Add error handling for audio processing failures
+   - ✓ Test with various audio message types and languages
 
 5. **Implement stream merging**
    - Create mechanism to merge processed messages from all streams
