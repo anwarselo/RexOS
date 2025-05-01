@@ -90,3 +90,13 @@ Check the Context7 MCP at the start of each new chat
 - Wait for explicit confirmation before creating any code, query, or plan related to database interactions
 - Do not create nodes or commands that interact with tables that aren't approved and documented
 - Only work with tables that are agreed upon and have their schema stored as CSV files in the 'current tables in db' folder
+
+## 13. Conversation Continuity
+- [2025-05-01 23:47] RexOS uses a conversation continuity system to maintain context across messages
+- [2025-05-01 23:47] The system uses ZEP Memory for semantic understanding and Supabase for state persistence
+- [2025-05-01 23:47] The conversation_contexts table in Supabase stores conversation state with fields: conversation_id, current_state, last_message, context_data, and updated_at
+- [2025-05-01 23:47] The AI Agent node in n8n is configured with ZEP memory and Supabase tools to maintain context
+- [2025-05-01 23:47] Media processing (images, documents, audio) feeds back to the STDRD node after processing to maintain context
+- [2025-05-01 23:47] Special message prefixes like "PROCESSED_IMAGE:" and "PROCESSED_DOCUMENT:" indicate media confirmations
+- [2025-05-01 23:47] The system message for the AI Agent includes instructions for handling these special message types
+- [2025-05-01 23:47] This implementation ensures seamless conversation flow even when processing different media types

@@ -2,6 +2,25 @@
 
 This file tracks all completed actions in the RexOS development process. It serves as a persistent record of our progress that we can refer to at any time. Each action is timestamped to provide a detailed chronology of development.
 
+## 2025-05-01
+
+### Conversation Continuity Implementation
+- [2025-05-01 23:47] Created conversation_contexts table in Supabase for storing conversation state
+- [2025-05-01 23:47] Implemented AI Agent node with ZEP memory and Supabase tools
+- [2025-05-01 23:47] Created Function nodes for processing media confirmations
+- [2025-05-01 23:47] Updated workflow to route processed media back to STDRD node
+- [2025-05-01 23:47] Enhanced AI system message to handle context-aware conversations
+- [2025-05-01 23:47] Updated AI_Assistant_Guidelines.md with conversation continuity documentation
+- [2025-05-01 23:47] Created examples/conversation_continuity.md with detailed implementation guide
+
+## 2023-05-03
+
+### Audio Transcription Implementation
+- [2023-05-03 17:30] Created Voice Transcription Function node to format OpenAI transcription output
+- [2023-05-03 17:35] Updated workflow to route transcribed voice messages back to STDRD node
+- [2023-05-03 17:40] Created documentation for voice transcription workflow
+- [2023-05-03 17:45] Updated TO_DO_LIST.md to reflect the new approach
+
 ## 2023-05-01
 
 ### Document Processing Implementation

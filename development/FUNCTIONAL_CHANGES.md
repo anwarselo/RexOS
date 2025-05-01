@@ -2,6 +2,52 @@
 
 This document tracks significant functional changes, additions, and removals in the RexOS system. It serves as a reference for updating documentation and understanding how the system's capabilities have evolved over time.
 
+## 2025-05-01
+
+### Added Functionality
+
+#### Conversation Continuity System
+- **Description**: Implemented a comprehensive conversation continuity system using ZEP memory and Supabase
+- **Components Added/Modified**:
+  - Created conversation_contexts table in Supabase
+  - Added AI Agent node with ZEP memory and Supabase tools
+  - Created Function nodes for processing media confirmations
+  - Updated workflow to route processed media back to STDRD node
+- **Motivation**: Enable context-aware conversations across multiple messages and media types
+- **Impact**: Users can now have natural conversations with context maintained across different message types and sessions
+- **Documentation Updates Needed**: Added conversation continuity section to AI_Assistant_Guidelines.md, created examples/conversation_continuity.md
+
+### Modified Functionality
+
+#### Media Processing Workflow
+- **Previous Approach**: Media processing (images, documents) ended with WhatsApp responses
+- **New Approach**: Processed media now feeds back to the STDRD node for context-aware handling
+- **Motivation**: Maintain conversation context even when processing different media types
+- **Impact**: More natural conversation flow with context awareness across all media types
+- **Documentation Updates Needed**: Updated AI_Assistant_Guidelines.md, created examples/conversation_continuity.md
+
+## 2023-05-03
+
+### Added Functionality
+
+#### Enhanced Voice Transcription Processing
+- **Description**: Implemented proper handling of transcribed voice messages in the workflow
+- **Components Added/Modified**:
+  - Added Voice_Transcription_Function_node_code_current.js to format OpenAI transcription output
+  - Created voice_transcription_workflow.md documentation
+- **Motivation**: Ensure voice messages with transcriptions are properly processed as reminders or other commands
+- **Impact**: Users can now send voice messages containing reminders and have them properly processed
+- **Documentation Updates Needed**: Voice transcription workflow documentation, WhatsApp integration documentation
+
+### Modified Functionality
+
+#### Voice Message Processing Workflow
+- **Previous Approach**: Voice messages were processed separately and displayed as "Voice message"
+- **New Approach**: Transcribed voice messages are now routed back to the main text processing flow
+- **Motivation**: Simplify the workflow and ensure consistent processing of all message types
+- **Impact**: Voice messages can now be used for all the same commands as text messages
+- **Documentation Updates Needed**: Voice transcription workflow documentation, WhatsApp integration documentation
+
 ## 2023-05-01
 
 ### Added Functionality
